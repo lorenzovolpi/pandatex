@@ -4,7 +4,7 @@ import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import List, Literal, Union
+from typing import List, Literal, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -529,11 +529,11 @@ class Table:
         def _get_column_alignment(column_alignment, n_cols: int) -> str:
             if column_alignment is None:
                 return "c" * n_cols
-            elif isinstance(column_alignment, tuple[list, str]):
+            elif isinstance(column_alignment, tuple) and isinstance(column_alignment[0], list):
                 _vals, _align = column_alignment
                 assert np.sum(_vals) == n_cols, f"Invalid column_alignment {column_alignment}, expected sum of {n_cols}"
                 return "|".join([_align * _n for _n in _vals])
-            elif isinstance(column_alignment, list[tuple]):
+            elif isinstance(column_alignment, list) and isinstance(column_alignment[0], tuple):
                 assert np.sum([_n for _n, _ in column_alignment]) == n_cols, (
                     f"Invalid column_alignment {column_alignment}, expected sum of {n_cols}"
                 )
@@ -543,7 +543,7 @@ class Table:
             if additional_headers is None:
                 return []
 
-            if isinstance(additional_headers, list[tuple]):
+            if isinstance(additional_headers, list) and isinstance(additional_headers[0], tuple):
                 additional_headers = [additional_headers]
 
             h_strings = []
