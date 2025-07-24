@@ -1,0 +1,24 @@
+[project]
+name = "pandatex"
+version = "0.1.2"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.2.6",
+    "pandas>=2.3.1",
+    "scipy>=1.15.3",
+]
+
+[tool.setuptools.package-dir]
+pandatex = "src/pandatex"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
