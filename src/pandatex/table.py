@@ -4,7 +4,7 @@ import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import List, Union
+from typing import List, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -521,7 +521,39 @@ class Table:
         benchmark_order=None,
         method_order=None,
         transpose=False,
+        column_alignment: tuple[list[int], Literal["c", "r", "l"]]
+        | list[tuple[int, Literal["c", "l", "r"]]]
+        | None = None,
+        additional_headers: list[list[tuple[str, int]]] | list[tuple[str, int]] | None = None,
     ):
+        def _get_column_alignment(column_alignment, n_cols: int) -> str:
+            if column_alignment is None:
+                return "c" * n_cols
+            elif isinstance(column_alignment, tuple[list, str]):
+                _vals, _align = column_alignment
+                assert np.sum(_vals) == n_cols, f"Invalid column_alignment {column_alignment}, expected sum of {n_cols}"
+                return "|".join([_align * _n for _n in _vals])
+            elif isinstance(column_alignment, list[tuple]):
+                assert np.sum([_n for _n, _ in column_alignment]) == n_cols, (
+                    f"Invalid column_alignment {column_alignment}, expected sum of {n_cols}"
+                )
+                return "|".join([_align * _n for _n, _align in column_alignment])
+
+        def _get_additional_headers(additional_headers, corner, toprule) -> list[str]:
+            if additional_headers is None:
+                return []
+
+            if isinstance(additional_headers, list[tuple]):
+                additional_headers = [additional_headers]
+
+            h_strings = []
+            for _ah in additional_headers:
+                line = corner
+                line += " & ".join([f"\\multicolumn{{{span}}}{{c|}}{{{_ht}}}" for _ht, span in _ah])
+                h_strings.extend([line, toprule])
+
+            return h_strings
+
         if benchmark_replace is None:
             benchmark_replace = {}
         if method_replace is None:
@@ -555,9 +587,14 @@ class Table:
             endl = " \\\\\\hline"
             midrule = endl
             bottomrule = endl
-            corner = "\multicolumn{1}{c|}{} & "
+            corner = "\\multicolumn{1}{c|}{} & "
 
-            begin_tabular = "\\begin{tabular}{|c" + "|c" * n_cols + ("||c" if add_mean_col else "") + "|}"
+            begin_tabular = (
+                "\\begin{tabular}{|c"
+                + _get_column_alignment(column_alignment, n_cols)
+                + ("||c" if add_mean_col else "")
+                + "|}"
+            )
         elif self.format.style == "rules":
             toprule = "\\toprule"
             endl = " \\\\"
@@ -565,7 +602,12 @@ class Table:
             bottomrule = " \\\\\\bottomrule"
             corner = " & "
 
-            begin_tabular = "\\begin{tabular}{c" + "c" * n_cols + ("c" if add_mean_col else "") + "}"
+            begin_tabular = (
+                "\\begin{tabular}{c"
+                + _get_column_alignment(column_alignment, n_cols)
+                + ("c" if add_mean_col else "")
+                + "}"
+            )
         elif self.format.style == "minimal":
             toprule = f"\\cline{{2-{last_col_idx}}}"
             endl = " \\\\"
@@ -573,12 +615,19 @@ class Table:
             bottomrule = " \\\\\\hline"
             corner = "\multicolumn{1}{c|}{} & "
 
-            begin_tabular = "\\begin{tabular}{|c|" + "c" * n_cols + ("|c" if add_mean_col else "") + "|}"
+            begin_tabular = (
+                "\\begin{tabular}{|c|"
+                + _get_column_alignment(column_alignment, n_cols)
+                + ("|c" if add_mean_col else "")
+                + "|}"
+            )
         else:
             raise ValueError(f"unknown format style {self.format.style}")
 
         lines.append(begin_tabular)
         lines.append(toprule)
+        for header in _get_additional_headers(additional_headers, corner, toprule):
+            lines.append(header)
 
         l = corner
         l += " & ".join([col_replace.get(col, col) for col in col_order])
@@ -652,6 +701,8 @@ class Table:
         benchmark_order=None,
         method_order=None,
         transpose=False,
+        *args,
+        **kwargs,
     ):
         if benchmark_replace is None:
             benchmark_replace = {}
@@ -665,7 +716,7 @@ class Table:
             lines.append("\\resizebox{\\textwidth}{!}{%")
 
         tabular_str = self.tabular(
-            tabular_path, benchmark_replace, method_replace, benchmark_order, method_order, transpose
+            tabular_path, benchmark_replace, method_replace, benchmark_order, method_order, transpose, *args, **kwargs
         )
         if tabular_path is None:
             lines.append(tabular_str)
