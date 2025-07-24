@@ -726,7 +726,7 @@ class Table:
         if resizebox:
             lines.append("}%")
         if caption is None:
-            caption = tabular_path.replace("_", "\_")
+            caption = tabular_path.replace("_", "\\_")
         lines.append(f"\\caption{{{caption}}}")
         if label is not None:
             lines.append(f"\\label{{{label}}}")
