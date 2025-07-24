@@ -550,7 +550,9 @@ class Table:
             for _ah in additional_headers:
                 line = corner
                 line += " & ".join([f"\\multicolumn{{{span}}}{{c|}}{{{_ht}}}" for _ht, span in _ah])
-                h_strings.extend([line, toprule])
+                line += endl
+                line += toprule
+                h_strings.append(line)
 
             return h_strings
 
