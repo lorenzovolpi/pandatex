@@ -105,7 +105,7 @@ class Cell:
         if self.isEmpty():
             return ""
 
-        whitespace = "$^{\phantom{\dag}}$" if self.format.show_stat else ""
+        whitespace = "$^{\\phantom{\\dag}}$" if self.format.show_stat else ""
 
         # mean
         # ---------------------------------------------------
@@ -119,7 +119,7 @@ class Cell:
             _std_val = f"{self.std():.{self.format.std_prec}f}"
             if self.format.remove_zero:
                 _std_val = _std_val.replace("0.", ".")
-            std = f"$\pm${whitespace}{_std_val}"
+            std = f"$\\pm${whitespace}{_std_val}"
         else:
             std = ""
 
@@ -134,14 +134,14 @@ class Cell:
                 if 0.001 > pval:
                     comp_symbol = whitespace
                 else:
-                    comp_symbol = "$^{\dag}$"
+                    comp_symbol = "$^{\\dag}$"
             elif pval is not None and not self.format.simple_stat:
                 if 0.001 > pval:
                     comp_symbol = whitespace
                 elif 0.05 > pval >= 0.001:
-                    comp_symbol = "$^{\dag}$"
+                    comp_symbol = "$^{\\dag}$"
                 elif pval >= 0.05:
-                    comp_symbol = "$^{\ddag}$"
+                    comp_symbol = "$^{\\ddag}$"
             str_cell = f"{mean}{comp_symbol}{std}"
 
         str_cell = str_cell.replace("$$", "")  # remove useless "$$"
@@ -236,7 +236,7 @@ class CellGroup:
                 if cell.mean() == best_bline.mean():
                     color = self.format.baseline_color
                     tone = self.format.maxtone
-                    return f"\cellcolor{{{color}!{int(tone)}}}"
+                    return f"\\cellcolor{{{color}!{int(tone)}}}"
                 else:
                     return ""
 
@@ -263,7 +263,7 @@ class CellGroup:
                 else:
                     # tone = self.format.maxtone * 0.6
                     color = self.format.mid_color
-                return f"\cellcolor{{{color}!{int(tone)}}}"
+                return f"\\cellcolor{{{color}!{int(tone)}}}"
             else:
                 return ""
 
@@ -301,7 +301,7 @@ class CellGroup:
                 color = cell.format.best_color
                 tone = cell.format.maxtone * normval
 
-            return f"\cellcolor{{{color}!{int(tone)}}}"
+            return f"\\cellcolor{{{color}!{int(tone)}}}"
 
     def rank(self, cell: Cell) -> int:
         if cell.isEmpty():
@@ -613,7 +613,7 @@ class Table:
             endl = " \\\\"
             midrule = " \\\\\\hline"
             bottomrule = " \\\\\\hline"
-            corner = "\multicolumn{1}{c|}{} & "
+            corner = "\\multicolumn{1}{c|}{} & "
 
             begin_tabular = (
                 "\\begin{tabular}{|c|"
@@ -711,7 +711,7 @@ class Table:
 
         lines = []
         lines.append("\\begin{table}[h]")
-        lines.append("\center")
+        lines.append("\\center")
         if resizebox:
             lines.append("\\resizebox{\\textwidth}{!}{%")
 
@@ -721,16 +721,16 @@ class Table:
         if tabular_path is None:
             lines.append(tabular_str)
         else:
-            lines.append(f"\input{{tables/{Path(tabular_path).name}}}")
+            lines.append(f"\\input{{tables/{Path(tabular_path).name}}}")
 
         if resizebox:
             lines.append("}%")
         if caption is None:
             caption = tabular_path.replace("_", "\_")
-        lines.append(f"\caption{{{caption}}}")
+        lines.append(f"\\caption{{{caption}}}")
         if label is not None:
-            lines.append(f"\label{{{label}}}")
-        lines.append("\end{table}")
+            lines.append(f"\\label{{{label}}}")
+        lines.append("\\end{table}")
 
         table_tex = "\n".join(lines)
 
