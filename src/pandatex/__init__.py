@@ -1,1 +1,1 @@
-from table import Format, Table
+from pandatex.table import Format, Table
