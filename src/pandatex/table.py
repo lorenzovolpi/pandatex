@@ -315,6 +315,11 @@ class CellGroup:
         return all_means.index(cell_mean) + 1
 
 
+class OracleCellGroup(CellGroup):
+    def color(self, cell: Cell):
+        return ""
+
+
 class Table:
     def __init__(
         self,
@@ -322,11 +327,13 @@ class Table:
         benchmarks=None,
         methods=None,
         baselines=None,
+        oracles=None,
     ):
         self.name = name
         self.benchmarks = [] if benchmarks is None else benchmarks
         self.methods = [] if methods is None else methods
         self.baselines = [] if baselines is None else baselines
+        self.oracles = [] if oracles is None else oracles
         self.format = Format()
 
         # if self.format.color_mode == 'global':
@@ -340,6 +347,7 @@ class Table:
         self.bline_groups = {}
         self.groups = {}
         self.global_group = self._new_group()
+        self.oracle_group = self._new_oracle_group()
         self.left_frame = None
 
     def add(self, benchmark, method, v):
@@ -364,6 +372,9 @@ class Table:
     def _new_group(self):
         return CellGroup(self.format)
 
+    def _new_oracle_group(self):
+        return OracleCellGroup(self.format)
+
     def get(self, benchmark, method) -> Cell:
         if benchmark not in self.benchmarks:
             self.benchmarks.append(benchmark)
@@ -379,7 +390,7 @@ class Table:
         if idx not in self.T:
             self.T[idx] = Cell(
                 self.format,
-                local_group=self.groups[benchmark],
+                local_group=self.oracle_group if method in self.oracles else self.groups[benchmark],
                 global_group=self.global_group,
                 baseline_group=self.bline_groups[benchmark],
                 is_baseline=method in self.baselines,
