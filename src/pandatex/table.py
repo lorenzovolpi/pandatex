@@ -319,6 +319,12 @@ class OracleCellGroup(CellGroup):
     def color(self, cell: Cell):
         return ""
 
+    def compare(self, cell: Cell):
+        return None
+
+    def best(self) -> Cell:
+        return None
+
 
 class Table:
     def __init__(
@@ -421,7 +427,7 @@ class Table:
             is_baseline = method in self.baselines
             method_mean = Cell(
                 self.format,
-                local_group=mean_group,
+                local_group=self.oracle_group if method in self.oracles else mean_group,
                 global_group=mean_global_group,
                 baseline_group=mean_bline_group,
                 is_baseline=is_baseline,
@@ -449,7 +455,7 @@ class Table:
                 cells.append(
                     Cell(
                         self.format,
-                        local_group=mean_group,
+                        local_group=self.oracle_group if method in self.oracles else mean_group,
                         global_group=mean_global_group,
                         baseline_group=mean_bline_group,
                         is_baseline=is_baseline,
@@ -472,7 +478,7 @@ class Table:
             rankmean_format.std_prec = self.format.meanrank_std_prec
             method_rank_mean = Cell(
                 format=rankmean_format,
-                local_group=rank_mean_group,
+                local_group=self.oracle_group if method in self.oracles else rank_mean_group,
                 global_group=rank_global_group,
                 baseline_group=rank_mean_bline_group,
                 is_baseline=is_baseline,
@@ -492,7 +498,7 @@ class Table:
                 cells.append(
                     Cell(
                         self.format,
-                        local_group=rank_mean_group,
+                        local_group=self.oracle_group if method in self.oracles else rank_mean_group,
                         global_group=rank_global_group,
                         baseline_group=rank_mean_bline_group,
                         is_baseline=is_baseline,

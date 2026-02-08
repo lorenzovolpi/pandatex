@@ -1,8 +1,12 @@
 # pandatex
 
-version: `0.1.3`
+version: `0.1.4`
 
 ## changelog
+
+### v0.1.4
+
+- added "oracles" group for "local" formatting to exclude columns from colouring
 
 ### v0.1.3
 
